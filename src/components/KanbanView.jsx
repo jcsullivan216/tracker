@@ -2,38 +2,31 @@ import React, { useState } from 'react';
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
-  KeyboardSensor,
+  closestCenter,
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { kanbanColumns, statusConfig, getServiceColor } from '../data/config';
+import { useDraggable } from '@dnd-kit/core';
+import { statusConfig, getServiceColor } from '../data/config';
 import { User, GripVertical } from 'lucide-react';
+
+// All kanban columns including not-engaged
+const allKanbanColumns = ['not-engaged', 'contacted', 'engaged', 'deployed', 'contract', 'on-ice'];
 
 // Draggable card component
 const DraggableCard = ({ item, onClick, mode }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: item.id,
+  });
 
   const svc = getServiceColor(item.service);
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1,
   };
 
   return (
@@ -46,10 +39,10 @@ const DraggableCard = ({ item, onClick, mode }) => {
         borderRadius: '6px',
         padding: '10px 12px',
         marginBottom: '8px',
-        cursor: 'grab',
         display: 'flex',
         gap: '8px',
         alignItems: 'flex-start',
+        touchAction: 'none',
       }}
     >
       {/* Drag handle */}
@@ -58,17 +51,21 @@ const DraggableCard = ({ item, onClick, mode }) => {
         {...listeners}
         style={{
           cursor: 'grab',
-          color: '#64748b',
+          color: '#94a3b8',
           padding: '2px',
           marginTop: '2px',
+          touchAction: 'none',
         }}
       >
-        <GripVertical size={14} />
+        <GripVertical size={16} />
       </div>
 
       {/* Card content - clickable */}
       <div
-        onClick={() => onClick(item)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(item);
+        }}
         style={{ flex: 1, cursor: 'pointer' }}
       >
         <div style={{ fontSize: '12px', fontWeight: '600', color: '#f1f5f9', marginBottom: '4px' }}>
@@ -116,7 +113,7 @@ const CardPreview = ({ item, mode }) => {
         border: `2px solid ${svc.border}`,
         borderRadius: '6px',
         padding: '10px 12px',
-        width: '280px',
+        width: '260px',
         boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
         cursor: 'grabbing',
       }}
@@ -143,25 +140,31 @@ const CardPreview = ({ item, mode }) => {
 };
 
 // Droppable column component
-const DroppableColumn = ({ status, items, onItemClick, mode }) => {
+const DroppableColumn = ({ status, items, onItemClick, mode, isOver }) => {
+  const { setNodeRef } = useDroppable({
+    id: status,
+  });
+
   const cfg = statusConfig[status];
 
   return (
     <div
+      ref={setNodeRef}
       style={{
         flex: 1,
-        minWidth: '280px',
-        maxWidth: '350px',
-        background: '#0f172a',
+        minWidth: '240px',
+        maxWidth: '300px',
+        background: isOver ? '#1e293b' : '#0f172a',
         borderRadius: '12px',
-        border: `1px solid ${cfg.border}33`,
+        border: `2px solid ${isOver ? cfg.border : cfg.border + '33'}`,
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        transition: 'all 0.2s ease',
       }}
     >
       {/* Column Header */}
       <div style={{
-        padding: '16px',
+        padding: '14px',
         borderBottom: `1px solid ${cfg.border}33`
       }}>
         <div style={{
@@ -182,7 +185,7 @@ const DroppableColumn = ({ status, items, onItemClick, mode }) => {
             }} />
             <span style={{
               color: cfg.textColor,
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: '600'
             }}>
               {cfg.label}
@@ -193,7 +196,7 @@ const DroppableColumn = ({ status, items, onItemClick, mode }) => {
             color: cfg.textColor,
             fontSize: '11px',
             fontWeight: '600',
-            padding: '4px 10px',
+            padding: '3px 8px',
             borderRadius: '6px'
           }}>
             {items.length}
@@ -206,32 +209,27 @@ const DroppableColumn = ({ status, items, onItemClick, mode }) => {
         style={{
           flex: 1,
           overflow: 'auto',
-          padding: '12px',
-          minHeight: '100px'
+          padding: '10px',
+          minHeight: '150px'
         }}
       >
-        <SortableContext
-          items={items.map(i => i.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {items.map(item => (
-            <DraggableCard
-              key={item.id}
-              item={item}
-              onClick={onItemClick}
-              mode={mode}
-            />
-          ))}
-        </SortableContext>
+        {items.map(item => (
+          <DraggableCard
+            key={item.id}
+            item={item}
+            onClick={onItemClick}
+            mode={mode}
+          />
+        ))}
 
         {items.length === 0 && (
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: '80px',
+            height: '100px',
             color: '#475569',
-            fontSize: '12px',
+            fontSize: '11px',
             fontStyle: 'italic',
             border: '2px dashed #334155',
             borderRadius: '8px'
@@ -246,14 +244,14 @@ const DroppableColumn = ({ status, items, onItemClick, mode }) => {
 
 const KanbanView = ({ filteredData, onItemClick, onStatusChange, mode }) => {
   const [activeId, setActiveId] = useState(null);
+  const [overId, setOverId] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 5,
       },
-    }),
-    useSensor(KeyboardSensor)
+    })
   );
 
   // Group items by status for kanban columns
@@ -261,77 +259,36 @@ const KanbanView = ({ filteredData, onItemClick, onStatusChange, mode }) => {
     return filteredData.filter(item => item.status === status);
   };
 
-  // Find which column an item belongs to
-  const findColumn = (id) => {
-    for (const status of kanbanColumns) {
-      const items = getItemsByStatus(status);
-      if (items.find(item => item.id === id)) {
-        return status;
-      }
-    }
-    return null;
-  };
-
   const handleDragStart = (event) => {
     setActiveId(event.active.id);
+  };
+
+  const handleDragOver = (event) => {
+    const { over } = event;
+    setOverId(over?.id || null);
   };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
     setActiveId(null);
+    setOverId(null);
 
     if (!over) return;
 
     const activeItem = filteredData.find(item => item.id === active.id);
     if (!activeItem) return;
 
-    // Determine target status
-    let targetStatus = null;
+    // Check if dropped over a column
+    const targetStatus = over.id;
 
-    // Check if dropped over a column (by checking if over.id is a status)
-    if (kanbanColumns.includes(over.id)) {
-      targetStatus = over.id;
-    } else {
-      // Dropped over another item - find that item's status
-      const overItem = filteredData.find(item => item.id === over.id);
-      if (overItem) {
-        targetStatus = overItem.status;
-      }
-    }
-
-    // Update status if changed
-    if (targetStatus && targetStatus !== activeItem.status) {
+    if (allKanbanColumns.includes(targetStatus) && targetStatus !== activeItem.status) {
       onStatusChange(activeItem.id, targetStatus);
     }
   };
 
-  const handleDragOver = (event) => {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    // Find the containers
-    const activeColumn = findColumn(activeId);
-    let overColumn = null;
-
-    if (kanbanColumns.includes(overId)) {
-      overColumn = overId;
-    } else {
-      overColumn = findColumn(overId);
-    }
-
-    if (!activeColumn || !overColumn || activeColumn === overColumn) {
-      return;
-    }
-
-    // Update item status when dragged over a different column
-    const activeItem = filteredData.find(item => item.id === activeId);
-    if (activeItem && activeItem.status !== overColumn) {
-      onStatusChange(activeId, overColumn);
-    }
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setOverId(null);
   };
 
   const activeItem = activeId ? filteredData.find(item => item.id === activeId) : null;
@@ -344,24 +301,26 @@ const KanbanView = ({ filteredData, onItemClick, onStatusChange, mode }) => {
     }}>
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={closestCenter}
         onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
         <div style={{
           display: 'flex',
-          gap: '16px',
-          minHeight: '100%',
+          gap: '12px',
+          minHeight: 'calc(100vh - 200px)',
           paddingBottom: '20px'
         }}>
-          {kanbanColumns.map(status => (
+          {allKanbanColumns.map(status => (
             <DroppableColumn
               key={status}
               status={status}
               items={getItemsByStatus(status)}
               onItemClick={onItemClick}
               mode={mode}
+              isOver={overId === status}
             />
           ))}
         </div>
