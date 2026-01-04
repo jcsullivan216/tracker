@@ -66,7 +66,7 @@ This tool helps defense technology companies track engagement status across the 
 ## Project Structure
 
 ```
-dod-engagement-tracker/
+jcs/
 ├── public/
 │   └── vite.svg
 ├── src/
