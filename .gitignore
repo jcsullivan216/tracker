@@ -37,3 +37,7 @@ coverage/
 # Cache
 .cache/
 .eslintcache
+
+# Source data files (converted to JSON in src/data/)
+*.csv
+*.xlsx

@@ -66,7 +66,7 @@ This tool helps defense technology companies track engagement status across the 
 ## Project Structure
 
 ```
-dod-engagement-tracker/
+jcs/
 ├── public/
 │   └── vite.svg
 ├── src/
@@ -109,7 +109,7 @@ dod-engagement-tracker/
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd dod-engagement-tracker
+cd jcs
 ```
 
 2. Install dependencies:
