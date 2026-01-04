@@ -65,11 +65,11 @@ const MapView = ({ filteredData, onItemClick, mode }) => {
   }, [itemsWithCoords]);
 
   return (
-    <div style={{ flex: 1, position: 'relative' }}>
+    <div style={{ flex: 1, position: 'relative', minHeight: 'calc(100vh - 200px)' }}>
       <MapContainer
         center={[30, -30]}
         zoom={2}
-        style={{ height: '100%', width: '100%', background: '#1a1a2e' }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#1a1a2e' }}
         scrollWheelZoom={true}
       >
         <TileLayer
