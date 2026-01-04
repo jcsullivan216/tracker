@@ -9,8 +9,12 @@ import Header from './components/Header';
 import FilterBar from './components/FilterBar';
 import ListView from './components/ListView';
 import KanbanView from './components/KanbanView';
+import MapView from './components/MapView';
 import ItemModal from './components/ItemModal';
 import AddModal from './components/AddModal';
+
+// Leaflet CSS
+import 'leaflet/dist/leaflet.css';
 
 // Utils
 import { generateId, getCurrentDate, filterData, groupByService, calculateStats } from './utils/helpers';
@@ -92,6 +96,15 @@ function App() {
     setSelectedItem(null);
   };
 
+  // Handler for drag-and-drop status changes in Kanban view
+  const handleStatusChange = (itemId, newStatus) => {
+    setData(prev => prev.map(item =>
+      item.id === itemId
+        ? { ...item, status: newStatus, lastContact: getCurrentDate() }
+        : item
+    ));
+  };
+
   const handleModeChange = (newMode) => {
     setMode(newMode);
     setFilterStatus('all');
@@ -134,7 +147,7 @@ function App() {
       />
 
       {/* Main Content */}
-      {viewMode === 'list' ? (
+      {viewMode === 'list' && (
         <ListView
           groupedData={groupedData}
           expandedGroups={expandedGroups}
@@ -142,8 +155,17 @@ function App() {
           onItemClick={setSelectedItem}
           mode={mode}
         />
-      ) : (
+      )}
+      {viewMode === 'kanban' && (
         <KanbanView
+          filteredData={filteredData}
+          onItemClick={setSelectedItem}
+          onStatusChange={handleStatusChange}
+          mode={mode}
+        />
+      )}
+      {viewMode === 'map' && (
+        <MapView
           filteredData={filteredData}
           onItemClick={setSelectedItem}
           mode={mode}

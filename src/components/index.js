@@ -16,3 +16,4 @@ export { default as Header } from './Header';
 export { default as FilterBar } from './FilterBar';
 export { default as ListView } from './ListView';
 export { default as KanbanView } from './KanbanView';
+export { default as MapView } from './MapView';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, List, Kanban, Plus } from 'lucide-react';
+import { Search, List, Kanban, Plus, MapPin } from 'lucide-react';
 import { statusConfig } from '../data/config';
 
 const FilterBar = ({
@@ -162,6 +162,24 @@ const FilterBar = ({
         >
           <Kanban size={14} />
           Pipeline
+        </button>
+        <button
+          onClick={() => setViewMode('map')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            background: viewMode === 'map' ? '#334155' : 'transparent',
+            color: viewMode === 'map' ? '#f1f5f9' : '#64748b',
+            cursor: 'pointer',
+            fontSize: '12px'
+          }}
+        >
+          <MapPin size={14} />
+          Map
         </button>
       </div>
 
