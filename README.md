@@ -63,60 +63,108 @@ This tool helps defense technology companies track engagement status across the 
 | status | Engagement status |
 | notes | Engagement notes |
 
-## Usage
+## Project Structure
 
-### Claude Artifacts
-This component is designed to run in Claude's artifact environment. Simply paste the JSX file contents when creating a React artifact.
+```
+dod-engagement-tracker/
+├── public/
+│   └── vite.svg
+├── src/
+│   ├── components/
+│   │   ├── AddBuyerModal.jsx    # Modal for adding custom buyers
+│   │   ├── AddModal.jsx         # Wrapper for add modals
+│   │   ├── AddUnitModal.jsx     # Modal for adding custom units
+│   │   ├── BuyerCard.jsx        # Card component for buyers
+│   │   ├── BuyerModal.jsx       # Detail modal for buyers
+│   │   ├── FilterBar.jsx        # Search and filter controls
+│   │   ├── Header.jsx           # App header with mode toggle
+│   │   ├── ItemCard.jsx         # Wrapper for card components
+│   │   ├── ItemModal.jsx        # Wrapper for detail modals
+│   │   ├── KanbanView.jsx       # Pipeline/Kanban board view
+│   │   ├── ListView.jsx         # Grouped list view
+│   │   ├── UserCard.jsx         # Card component for users
+│   │   ├── UserModal.jsx        # Detail modal for users
+│   │   └── index.js             # Component exports
+│   ├── data/
+│   │   ├── buyers.json          # Buyer/program data (273 entries)
+│   │   ├── config.js            # Colors and status configuration
+│   │   └── users.json           # User/unit data (144 entries)
+│   ├── utils/
+│   │   └── helpers.js           # Utility functions
+│   ├── App.jsx                  # Main application component
+│   ├── index.css                # Global styles
+│   └── main.jsx                 # Entry point
+├── .eslintrc.cjs
+├── .gitignore
+├── index.html
+├── package.json
+├── README.md
+└── vite.config.js
+```
 
-### Standalone React App
-To run as a standalone application:
+## Getting Started
 
-1. Create a new Vite project:
+### Installation
+
+1. Clone the repository:
 ```bash
-npm create vite@latest dod-engagement -- --template react
-cd dod-engagement
+git clone <repository-url>
+cd dod-engagement-tracker
 ```
 
 2. Install dependencies:
 ```bash
-npm install lucide-react
+npm install
 ```
 
-3. Replace `src/App.jsx` with the component file
-
-4. Run the development server:
+3. Start the development server:
 ```bash
 npm run dev
 ```
 
+4. Open your browser to `http://localhost:3000`
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist/` directory.
+
 ### Dependencies
 - React 18+
 - lucide-react (icons)
+- Vite (build tool)
 
 ## Customization
 
 ### Adding Services/Agencies
-Edit the `serviceColors` object to add new color schemes:
+Edit `src/data/config.js` to add new color schemes:
 
 ```javascript
-const serviceColors = {
+export const serviceColors = {
   'New Agency': { bg: '#1a1a2e', border: '#6366f1', text: '#818cf8', badge: '#4338ca' },
   // ...
 };
 ```
 
 ### Modifying Status Pipeline
-Edit `statusConfig` and `kanbanColumns` to customize engagement stages:
+Edit `statusConfig` and `kanbanColumns` in `src/data/config.js` to customize engagement stages:
 
 ```javascript
-const statusConfig = {
+export const statusConfig = {
   'new-status': { label: 'Display Name', color: '#1a1a2e', border: '#6366f1', textColor: '#818cf8' },
   // ...
 };
 ```
 
 ### Data Sources
-The component initializes with embedded JSON data. To connect to external data sources, modify the `useState` initializations for `units` and `orgs`.
+Data is stored in JSON files in `src/data/`:
+- `users.json` - Operational units data
+- `buyers.json` - Acquisition programs data
+
+To connect to external data sources (API, database), modify the data loading in `src/App.jsx`.
 
 ## Data Coverage
 
