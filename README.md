@@ -66,7 +66,7 @@ This tool helps defense technology companies track engagement status across the 
 ## Project Structure
 
 ```
-jcs/
+tracker/
 ├── public/
 │   └── vite.svg
 ├── src/
@@ -109,7 +109,7 @@ jcs/
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd jcs
+cd tracker
 ```
 
 2. Install dependencies:
